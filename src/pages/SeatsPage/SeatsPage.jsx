@@ -1,12 +1,27 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import axios from "axios";
 
-export default function SeatsPage() {
+export default function SeatsPage({ setUsrInformation }) {
+	const [name, setName] = useState("");
+	const [cpf, setCpf] = useState("");
+
 	const id = useParams().id;
 	const [movieSeats, setMovieSeats] = useState([]);
 	const [chosen, setChosen] = useState([]);
+
+	const [seatsName, setSeatsName] = useState([]);
+
+	const cpfMask = (value) => {
+		return value
+			.replace(/\D/g, "")
+			.replace(/(\d{3})(\d)/, "$1.$2")
+			.replace(/(\d{3})(\d)/, "$1.$2")
+			.replace(/(\d{3})(\d{1,2})/, "$1-$2")
+			.replace(/(-\d{2})\d+?$/, "$1");
+	};
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		axios
@@ -21,6 +36,21 @@ export default function SeatsPage() {
 			});
 	});
 
+	function reserveSeats(event) {
+		event.preventDefault();
+
+		const usrOrder = {
+			ids: chosen,
+			name: name,
+			cpf: cpf,
+		};
+
+		axios.post(
+			"https://mock-api.driven.com.br/api/v8/cineflex/seats/book-many",
+			usrOrder
+		);
+	}
+
 	return movieSeats.seats ? (
 		<PageContainer>
 			Selecione o(s) assento(s)
@@ -34,32 +64,79 @@ export default function SeatsPage() {
 							id={seat.id}
 							chosen={chosen}
 							setChosen={setChosen}
+							seatsName={seatsName}
+							setSeatsName={setSeatsName}
 						/>
 					);
 				})}
 			</SeatsContainer>
 			<CaptionContainer>
 				<CaptionItem>
-					<CaptionCircle situation={"red"} />
+					<CaptionCircle
+						situationBackground={"#1AAE9E"}
+						situationBorder={"#0E7D71"}
+					/>
 					Selecionado
 				</CaptionItem>
 				<CaptionItem>
-					<CaptionCircle situation={"available"} />
+					<CaptionCircle
+						situationBackground={"#C3CFD9"}
+						situationBorder={"#7B8B99"}
+					/>
 					Disponível
 				</CaptionItem>
 				<CaptionItem>
-					<CaptionCircle situation={"unavailable"} />
+					<CaptionCircle
+						situationBackground={"#FBE192"}
+						situationBorder={"#F7C52B"}
+					/>
 					Indisponível
 				</CaptionItem>
 			</CaptionContainer>
 			<FormContainer>
-				Nome do Comprador:
-				<input placeholder="Digite seu nome..." />
-				CPF do Comprador:
-				<input placeholder="Digite seu CPF..." />
-				<button>Reservar Assento(s)</button>
+				<form
+					onSubmit={(e) => {
+						reserveSeats(e);
+						let updatedCpf = cpf;
+						if (cpf.length > 14) {
+							updatedCpf = updatedCpf.slice(0, -1);
+							setCpf(updatedCpf);
+							console.log(updatedCpf);
+						}
+						setUsrInformation({
+							title: movieSeats.movie.title,
+							date: movieSeats.day.date,
+							hour: movieSeats.name,
+							seats: seatsName,
+							name: name,
+							cpf: updatedCpf,
+						});
+						navigate("/sucesso/");
+					}}
+				>
+					<label htmlFor="name">Nome do Comprador:</label>
+					<input
+					data-test="client-name"
+						id="name"
+						placeholder="Digite seu nome..."
+						value={name}
+						onChange={(e) => setName(e.target.value)}
+						required
+					/>
+
+					<label htmlFor="cpf">CPF do Comprador:</label>
+					<input
+					data-test="client-cpf"
+						id="cpf"
+						placeholder="Digite seu CPF..."
+						value={cpfMask(cpf)}
+						onChange={(e) => setCpf(e.target.value)}
+						required
+					/>
+					<button data-test="book-seat-btn" type="submit">Reservar Assento(s)</button>
+				</form>
 			</FormContainer>
-			<FooterContainer>
+			<FooterContainer data-test="footer">
 				<div>
 					<img src={movieSeats.movie.posterURL} alt="poster" />
 				</div>
@@ -76,7 +153,15 @@ export default function SeatsPage() {
 	);
 }
 
-function SeatItem({ available, name, id, chosen, setChosen }) {
+function SeatItem({
+	available,
+	name,
+	id,
+	chosen,
+	setChosen,
+	seatsName,
+	setSeatsName,
+}) {
 	const [color, setColor] = useState({
 		background: "#C3CFD9",
 		border: "#7B8B99",
@@ -88,18 +173,27 @@ function SeatItem({ available, name, id, chosen, setChosen }) {
 
 	return (
 		<SeatItemDiv
+			data-test="seat"
 			onClick={() => {
 				if (available || chosen.includes(id)) {
 					if (!chosen.includes(id)) {
 						const updatedChosen = [...chosen, id];
 						setChosen(updatedChosen);
 						setColor({ background: "#1AAE9E", border: "#0E7D71" });
+
+						const updatedSeatsName = [...seatsName, name];
+						setSeatsName(updatedSeatsName);
 					} else {
 						const updatedChosen = [...chosen];
 						const ind = updatedChosen.indexOf(id, 0);
 						updatedChosen.splice(ind, 1);
 						setChosen(updatedChosen);
 						setColor({ background: "#C3CFD9", border: "#7B8B99" });
+
+						const updatedSeatsName = [...seatsName];
+						const indName = updatedSeatsName.indexOf(name);
+						updatedSeatsName.splice(indName, 1);
+						setSeatsName(updatedSeatsName);
 					}
 				}
 			}}
@@ -154,18 +248,8 @@ const CaptionContainer = styled.div`
 	margin: 20px;
 `;
 const CaptionCircle = styled.div`
-	border: 1px solid
-		${({ situation }) => {
-			switch ({ situation }) {
-				case "selected":
-					return "#0E7D71";
-				case "available":
-					return "#7B8B99";
-				case "unavailable":
-					return "#F7C52B";
-			}
-		}};
-	background-color: ${({ situation }) => situation};
+	border: 1px solid ${({ situationBorder }) => situationBorder};
+	background-color: ${({ situationBackground }) => situationBackground};
 	height: 25px;
 	width: 25px;
 	border-radius: 25px;

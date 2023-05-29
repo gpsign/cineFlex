@@ -48,7 +48,7 @@ const ListContainer = styled.div`
 function Movie({ URL, id }) {
 	const navigate = useNavigate();
 	return (
-		<MovieContainer onClick={() => navigate(`/sessoes/${id}`)}>
+		<MovieContainer data-test="movie" onClick={() => navigate(`/sessoes/${id}`)}>
 			<img src={URL} />
 		</MovieContainer>
 	);

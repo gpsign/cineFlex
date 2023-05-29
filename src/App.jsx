@@ -6,18 +6,22 @@ import SuccessPage from "./pages/SuccessPage/SuccessPage";
 
 import axios from "axios";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useState } from "react";
 
 axios.defaults.headers.common["Authorization"] = "uxytTt4soTaH1SmREudfEVPA";
 
 export default function App() {
+
+	const [usrInformation, setUsrInformation] = useState('');
+
 	return (
 		<BrowserRouter>
 			<NavContainer>CINEFLEX</NavContainer>
 			<Routes>
 				<Route path="/" element={<HomePage />} />
-				<Route path="/assentos/:id" element={<SeatsPage />} />
 				<Route path="/sessoes/:id" element={<SessionsPage />} />
-				<Route path="/sucesso/" element={<SuccessPage />} />
+				<Route path="/assentos/:id" element={<SeatsPage setUsrInformation={setUsrInformation} />} />
+				<Route path="/sucesso/" element={<SuccessPage usrInformation={usrInformation}/>} />
 			</Routes>
 		</BrowserRouter>
 	);

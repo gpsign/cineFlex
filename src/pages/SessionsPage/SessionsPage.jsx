@@ -38,7 +38,7 @@ export default function SessionsPage() {
 					<h1>Carregando</h1>
 				)}
 			</div>
-			<FooterContainer>
+			<FooterContainer data-test="footer">
 				<div>
 					<img src={schedules.posterURL} />
 				</div>
@@ -53,12 +53,13 @@ export default function SessionsPage() {
 function SessionContainer({ day, date, showTimes }) {
 	const navigate = useNavigate();
 	return (
-		<SessionContainerDiv>
+		<SessionContainerDiv data-test="movie-day">
 			{day} - {date}
 			<ButtonsContainer>
 				{showTimes.map((hours) => {
 					return (
 						<button
+							data-test="showtime"
 							key={hours.id}
 							onClick={() => navigate(`/assentos/${hours.id}`)}
 						>
