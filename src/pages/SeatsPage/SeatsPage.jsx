@@ -116,7 +116,7 @@ export default function SeatsPage({ setUsrInformation }) {
 				>
 					<label htmlFor="name">Nome do Comprador:</label>
 					<input
-					data-test="client-name"
+						data-test="client-name"
 						id="name"
 						placeholder="Digite seu nome..."
 						value={name}
@@ -126,14 +126,16 @@ export default function SeatsPage({ setUsrInformation }) {
 
 					<label htmlFor="cpf">CPF do Comprador:</label>
 					<input
-					data-test="client-cpf"
+						data-test="client-cpf"
 						id="cpf"
 						placeholder="Digite seu CPF..."
 						value={cpfMask(cpf)}
 						onChange={(e) => setCpf(e.target.value)}
 						required
 					/>
-					<button data-test="book-seat-btn" type="submit">Reservar Assento(s)</button>
+					<button data-test="book-seat-btn" type="submit">
+						Reservar Assento(s)
+					</button>
 				</form>
 			</FormContainer>
 			<FooterContainer data-test="footer">
@@ -195,7 +197,7 @@ function SeatItem({
 						updatedSeatsName.splice(indName, 1);
 						setSeatsName(updatedSeatsName);
 					}
-				}
+				} else if (!available) alert("Esse assento não está disponível");
 			}}
 			background={color.background}
 			border={color.border}
