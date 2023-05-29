@@ -111,7 +111,7 @@ export default function SeatsPage({ setUsrInformation }) {
 							name: name,
 							cpf: updatedCpf,
 						});
-						navigate("/sucesso/");
+						navigate("/sucesso");
 					}}
 				>
 					<label htmlFor="name">Nome do Comprador:</label>
