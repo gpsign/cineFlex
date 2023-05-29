@@ -145,7 +145,7 @@ export default function SeatsPage({ setUsrInformation }) {
 				<div>
 					<p>{movieSeats.movie.title}</p>
 					<p>
-						{movieSeats.day.weekday} - {movieSeats.day.date}
+						{movieSeats.day.weekday} - {movieSeats.name}
 					</p>
 				</div>
 			</FooterContainer>
